@@ -3,27 +3,23 @@ Seng5831_Assignments.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000001f6  00000000  00000000  00000074  2**1
+  0 .text         0000010e  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .bss          00000004  00800100  00800100  0000026a  2**0
-                  ALLOC
-  2 .comment      00000030  00000000  00000000  0000026a  2**0
+  1 .comment      00000030  00000000  00000000  00000162  2**0
                   CONTENTS, READONLY
-  3 .debug_aranges 00000040  00000000  00000000  0000029a  2**0
+  2 .debug_aranges 00000028  00000000  00000000  00000192  2**0
                   CONTENTS, READONLY, DEBUGGING
-  4 .debug_info   00000302  00000000  00000000  000002da  2**0
+  3 .debug_info   00000271  00000000  00000000  000001ba  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_abbrev 000001e7  00000000  00000000  000005dc  2**0
+  4 .debug_abbrev 00000169  00000000  00000000  0000042b  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_line   000002b9  00000000  00000000  000007c3  2**0
+  5 .debug_line   0000026b  00000000  00000000  00000594  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_frame  000000ac  00000000  00000000  00000a7c  2**2
+  6 .debug_frame  00000034  00000000  00000000  00000800  2**2
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_str    00000215  00000000  00000000  00000b28  2**0
+  7 .debug_str    00000209  00000000  00000000  00000834  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_loc    0000011a  00000000  00000000  00000d3d  2**0
-                  CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000030  00000000  00000000  00000e57  2**0
+  8 .debug_ranges 00000018  00000000  00000000  00000a3d  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -45,7 +41,7 @@ Disassembly of section .text:
   34:	0c 94 65 00 	jmp	0xca	; 0xca <__bad_interrupt>
   38:	0c 94 65 00 	jmp	0xca	; 0xca <__bad_interrupt>
   3c:	0c 94 65 00 	jmp	0xca	; 0xca <__bad_interrupt>
-  40:	0c 94 75 00 	jmp	0xea	; 0xea <__vector_16>
+  40:	0c 94 65 00 	jmp	0xca	; 0xca <__bad_interrupt>
   44:	0c 94 65 00 	jmp	0xca	; 0xca <__bad_interrupt>
   48:	0c 94 65 00 	jmp	0xca	; 0xca <__bad_interrupt>
   4c:	0c 94 65 00 	jmp	0xca	; 0xca <__bad_interrupt>
@@ -77,7 +73,7 @@ Disassembly of section .text:
   98:	11 e0       	ldi	r17, 0x01	; 1
   9a:	a0 e0       	ldi	r26, 0x00	; 0
   9c:	b1 e0       	ldi	r27, 0x01	; 1
-  9e:	e6 ef       	ldi	r30, 0xF6	; 246
+  9e:	ee e0       	ldi	r30, 0x0E	; 14
   a0:	f1 e0       	ldi	r31, 0x01	; 1
   a2:	00 e0       	ldi	r16, 0x00	; 0
   a4:	0b bf       	out	0x3b, r16	; 59
@@ -98,214 +94,68 @@ Disassembly of section .text:
   ba:	1d 92       	st	X+, r1
 
 000000bc <.do_clear_bss_start>:
-  bc:	a4 30       	cpi	r26, 0x04	; 4
+  bc:	a0 30       	cpi	r26, 0x00	; 0
   be:	b2 07       	cpc	r27, r18
   c0:	e1 f7       	brne	.-8      	; 0xba <.do_clear_bss_loop>
-  c2:	0e 94 d0 00 	call	0x1a0	; 0x1a0 <main>
-  c6:	0c 94 f9 00 	jmp	0x1f2	; 0x1f2 <_exit>
+  c2:	0e 94 67 00 	call	0xce	; 0xce <main>
+  c6:	0c 94 85 00 	jmp	0x10a	; 0x10a <_exit>
 
 000000ca <__bad_interrupt>:
   ca:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
-000000ce <set_digital_output.constprop.2>:
-// setting it as high-impedance (val = 0) or enabling the internal pull-up (val = 1).  If the pin is an
+000000ce <main>:
 // output, this lets you choose between driving low (val = 0) and driving high (val = 1).
 // NOTE: if val is 0xFF (255), this method will toggle the PORT register pin(s).
 static inline void set_digital_output_value(struct IOStruct* ioPin, unsigned char val)
 {
 	if (val == 0xFF)
-  ce:	8f 3f       	cpi	r24, 0xFF	; 255
-  d0:	29 f4       	brne	.+10     	; 0xdc <set_digital_output.constprop.2+0xe>
 		*(ioPin->portRegister) ^= ioPin->bitmask;
-  d2:	8b b1       	in	r24, 0x0b	; 11
-  d4:	92 e0       	ldi	r25, 0x02	; 2
-  d6:	89 27       	eor	r24, r25
-  d8:	8b b9       	out	0x0b, r24	; 11
-  da:	05 c0       	rjmp	.+10     	; 0xe6 <set_digital_output.constprop.2+0x18>
-	else if (val)
-  dc:	88 23       	and	r24, r24
-  de:	11 f0       	breq	.+4      	; 0xe4 <set_digital_output.constprop.2+0x16>
-		*(ioPin->portRegister) |= ioPin->bitmask;
-  e0:	59 9a       	sbi	0x0b, 1	; 11
-  e2:	01 c0       	rjmp	.+2      	; 0xe6 <set_digital_output.constprop.2+0x18>
-	else
-		*(ioPin->portRegister) &= ~ioPin->bitmask;
-  e4:	59 98       	cbi	0x0b, 1	; 11
+  ce:	8b b1       	in	r24, 0x0b	; 11
+  d0:	92 e0       	ldi	r25, 0x02	; 2
+  d2:	89 27       	eor	r24, r25
+  d4:	8b b9       	out	0x0b, r24	; 11
 // low-level method for setting the data direction (i.e. input or output) of an pin or set of pins
 // described by an IOStruct pointer.
 static inline void set_data_direction(struct IOStruct* ioPin, unsigned char val)
 {
 	if (val)
 		*(ioPin->ddrRegister) |= ioPin->bitmask;
-  e6:	51 9a       	sbi	0x0a, 1	; 10
-  e8:	08 95       	ret
-
-000000ea <__vector_16>:
-
-#include <pololu/orangutan.h>
-
-unsigned long timer_counter = 0;
-
-ISR(TIMER0_COMPA_vect){
-  ea:	1f 92       	push	r1
-  ec:	0f 92       	push	r0
-  ee:	0f b6       	in	r0, 0x3f	; 63
-  f0:	0f 92       	push	r0
-  f2:	11 24       	eor	r1, r1
-  f4:	0b b6       	in	r0, 0x3b	; 59
-  f6:	0f 92       	push	r0
-  f8:	2f 93       	push	r18
-  fa:	3f 93       	push	r19
-  fc:	4f 93       	push	r20
-  fe:	5f 93       	push	r21
- 100:	6f 93       	push	r22
- 102:	7f 93       	push	r23
- 104:	8f 93       	push	r24
- 106:	9f 93       	push	r25
- 108:	af 93       	push	r26
- 10a:	bf 93       	push	r27
- 10c:	ef 93       	push	r30
- 10e:	ff 93       	push	r31
-	cli();
- 110:	f8 94       	cli
-	timer_counter++;
- 112:	60 91 00 01 	lds	r22, 0x0100
- 116:	70 91 01 01 	lds	r23, 0x0101
- 11a:	80 91 02 01 	lds	r24, 0x0102
- 11e:	90 91 03 01 	lds	r25, 0x0103
- 122:	6f 5f       	subi	r22, 0xFF	; 255
- 124:	7f 4f       	sbci	r23, 0xFF	; 255
- 126:	8f 4f       	sbci	r24, 0xFF	; 255
- 128:	9f 4f       	sbci	r25, 0xFF	; 255
- 12a:	60 93 00 01 	sts	0x0100, r22
- 12e:	70 93 01 01 	sts	0x0101, r23
- 132:	80 93 02 01 	sts	0x0102, r24
- 136:	90 93 03 01 	sts	0x0103, r25
-	if (timer_counter % 500 == 0)	// slow down the blink rate
- 13a:	24 ef       	ldi	r18, 0xF4	; 244
- 13c:	31 e0       	ldi	r19, 0x01	; 1
- 13e:	40 e0       	ldi	r20, 0x00	; 0
- 140:	50 e0       	ldi	r21, 0x00	; 0
- 142:	0e 94 d7 00 	call	0x1ae	; 0x1ae <__udivmodsi4>
- 146:	67 2b       	or	r22, r23
- 148:	68 2b       	or	r22, r24
- 14a:	69 2b       	or	r22, r25
- 14c:	59 f4       	brne	.+22     	; 0x164 <__vector_16+0x7a>
-// high or low, depending on the argument.
-static inline void red_led(unsigned char on)
-{
-	#if defined (_ORANGUTAN_SVP)	// red LED turns on when driven low
-	if (on == TOGGLE)
-		set_digital_output(RED_LED, TOGGLE);
- 14e:	8f ef       	ldi	r24, 0xFF	; 255
- 150:	0e 94 67 00 	call	0xce	; 0xce <set_digital_output.constprop.2>
-	{
-		red_led(TOGGLE);
-		timer_counter=0;
- 154:	10 92 00 01 	sts	0x0100, r1
- 158:	10 92 01 01 	sts	0x0101, r1
- 15c:	10 92 02 01 	sts	0x0102, r1
- 160:	10 92 03 01 	sts	0x0103, r1
-	}
-	sei();
- 164:	78 94       	sei
-}
- 166:	ff 91       	pop	r31
- 168:	ef 91       	pop	r30
- 16a:	bf 91       	pop	r27
- 16c:	af 91       	pop	r26
- 16e:	9f 91       	pop	r25
- 170:	8f 91       	pop	r24
- 172:	7f 91       	pop	r23
- 174:	6f 91       	pop	r22
- 176:	5f 91       	pop	r21
- 178:	4f 91       	pop	r20
- 17a:	3f 91       	pop	r19
- 17c:	2f 91       	pop	r18
- 17e:	0f 90       	pop	r0
- 180:	0b be       	out	0x3b, r0	; 59
- 182:	0f 90       	pop	r0
- 184:	0f be       	out	0x3f, r0	; 63
- 186:	0f 90       	pop	r0
- 188:	1f 90       	pop	r1
- 18a:	18 95       	reti
-
-0000018c <init_timer>:
-
-void init_timer()
-{
-	// This is specific to a non-pwm timer
-	// need to calculate the interrupt rate
-	TCCR0A = 0b10000010;	// set the register A values - from the data sheet 
- 18c:	82 e8       	ldi	r24, 0x82	; 130
- 18e:	84 bd       	out	0x24, r24	; 36
-	TCCR0B = 0b0000110;		// set the register B values - from the data sheet
- 190:	86 e0       	ldi	r24, 0x06	; 6
- 192:	85 bd       	out	0x25, r24	; 37
-	OCR0A = 200;			// set the count for the formula
- 194:	88 ec       	ldi	r24, 0xC8	; 200
- 196:	87 bd       	out	0x27, r24	; 39
-	TIMSK0 = 0b00000010;	// enable the interrupt watch
- 198:	82 e0       	ldi	r24, 0x02	; 2
- 19a:	80 93 6e 00 	sts	0x006E, r24
- 19e:	08 95       	ret
-
-000001a0 <main>:
- 1a0:	8f ef       	ldi	r24, 0xFF	; 255
- 1a2:	0e 94 67 00 	call	0xce	; 0xce <set_digital_output.constprop.2>
-}
+  d6:	51 9a       	sbi	0x0a, 1	; 10
 
 int main()
-{	
+{
 	red_led(TOGGLE);	// check led
-	init_timer();		// init timer
- 1a6:	0e 94 c6 00 	call	0x18c	; 0x18c <init_timer>
-	sei();				// enable interrupts
- 1aa:	78 94       	sei
- 1ac:	ff cf       	rjmp	.-2      	; 0x1ac <main+0xc>
+	
+	DDRD |= _BV(5);
+  d8:	55 9a       	sbi	0x0a, 5	; 10
+	PORTD |= _BV(5);
+  da:	5d 9a       	sbi	0x0b, 5	; 11
+	// WGM is MODE 14 refer to table 16-5 in data sheet
+	// Prescaler is 1024 [set to highest and work your way down] This coordinates with the TOP
+	// COM1A clear on compare match refer to table 16-3 in data sheet
+	TCCR1A = 0b10100010; // COM1A1;COM1A0;COM1B1;COM1B0;-;-;WGM11;WGM10
+  dc:	82 ea       	ldi	r24, 0xA2	; 162
+  de:	80 93 80 00 	sts	0x0080, r24
+	TCCR1B = 0b00011101; // ICNC1;ICES1;-;WGM13;WGM12;CS12;CS11;CS10
+  e2:	8d e1       	ldi	r24, 0x1D	; 29
+  e4:	80 93 81 00 	sts	0x0081, r24
+	
+	ICR1 = 0x7D0;  // TOP is 2000 [Set this as high as possible, then work down] This coordinates with the Prescaler
+  e8:	80 ed       	ldi	r24, 0xD0	; 208
+  ea:	97 e0       	ldi	r25, 0x07	; 7
+  ec:	90 93 87 00 	sts	0x0087, r25
+  f0:	80 93 86 00 	sts	0x0086, r24
+	OCR1A = ICR1/2; // Half of ICR1 1000
+  f4:	80 91 86 00 	lds	r24, 0x0086
+  f8:	90 91 87 00 	lds	r25, 0x0087
+  fc:	96 95       	lsr	r25
+  fe:	87 95       	ror	r24
+ 100:	90 93 89 00 	sts	0x0089, r25
+ 104:	80 93 88 00 	sts	0x0088, r24
+ 108:	ff cf       	rjmp	.-2      	; 0x108 <main+0x3a>
 
-000001ae <__udivmodsi4>:
- 1ae:	a1 e2       	ldi	r26, 0x21	; 33
- 1b0:	1a 2e       	mov	r1, r26
- 1b2:	aa 1b       	sub	r26, r26
- 1b4:	bb 1b       	sub	r27, r27
- 1b6:	fd 01       	movw	r30, r26
- 1b8:	0d c0       	rjmp	.+26     	; 0x1d4 <__udivmodsi4_ep>
+0000010a <_exit>:
+ 10a:	f8 94       	cli
 
-000001ba <__udivmodsi4_loop>:
- 1ba:	aa 1f       	adc	r26, r26
- 1bc:	bb 1f       	adc	r27, r27
- 1be:	ee 1f       	adc	r30, r30
- 1c0:	ff 1f       	adc	r31, r31
- 1c2:	a2 17       	cp	r26, r18
- 1c4:	b3 07       	cpc	r27, r19
- 1c6:	e4 07       	cpc	r30, r20
- 1c8:	f5 07       	cpc	r31, r21
- 1ca:	20 f0       	brcs	.+8      	; 0x1d4 <__udivmodsi4_ep>
- 1cc:	a2 1b       	sub	r26, r18
- 1ce:	b3 0b       	sbc	r27, r19
- 1d0:	e4 0b       	sbc	r30, r20
- 1d2:	f5 0b       	sbc	r31, r21
-
-000001d4 <__udivmodsi4_ep>:
- 1d4:	66 1f       	adc	r22, r22
- 1d6:	77 1f       	adc	r23, r23
- 1d8:	88 1f       	adc	r24, r24
- 1da:	99 1f       	adc	r25, r25
- 1dc:	1a 94       	dec	r1
- 1de:	69 f7       	brne	.-38     	; 0x1ba <__udivmodsi4_loop>
- 1e0:	60 95       	com	r22
- 1e2:	70 95       	com	r23
- 1e4:	80 95       	com	r24
- 1e6:	90 95       	com	r25
- 1e8:	9b 01       	movw	r18, r22
- 1ea:	ac 01       	movw	r20, r24
- 1ec:	bd 01       	movw	r22, r26
- 1ee:	cf 01       	movw	r24, r30
- 1f0:	08 95       	ret
-
-000001f2 <_exit>:
- 1f2:	f8 94       	cli
-
-000001f4 <__stop_program>:
- 1f4:	ff cf       	rjmp	.-2      	; 0x1f4 <__stop_program>
+0000010c <__stop_program>:
+ 10c:	ff cf       	rjmp	.-2      	; 0x10c <__stop_program>

@@ -12,31 +12,23 @@
 
 unsigned long timer_counter = 0;
 
-ISR(TIMER0_COMPA_vect){
-	cli();
-	timer_counter++;
-	if (timer_counter % 500 == 0)	// slow down the blink rate
-	{
-		red_led(TOGGLE);
-		timer_counter=0;
-	}
-	sei();
-}
-
-void init_timer()
-{
-	// This is specific to a non-pwm timer
-	// need to calculate the interrupt rate
-	TCCR0A = 0b10000010;	// set the register A values - from the data sheet 
-	TCCR0B = 0b0000110;		// set the register B values - from the data sheet
-	OCR0A = 200;			// set the count for the formula
-	TIMSK0 = 0b00000010;	// enable the interrupt watch
-}
-
 int main()
-{	
+{
 	red_led(TOGGLE);	// check led
-	init_timer();		// init timer
-	sei();				// enable interrupts
-	while(1);			// ensure program runs continuously 
+	
+	DDRD |= _BV(5);
+	PORTD |= _BV(5);
+	// WGM is MODE 14 refer to table 16-5 in data sheet
+	// Prescaler is 1024 [set to highest and work your way down] This coordinates with the TOP
+	// COM1A clear on compare match refer to table 16-3 in data sheet
+	TCCR1A = 0b10100010; // COM1A1;COM1A0;COM1B1;COM1B0;-;-;WGM11;WGM10
+	TCCR1B = 0b00011101; // ICNC1;ICES1;-;WGM13;WGM12;CS12;CS11;CS10
+	
+	ICR1 = 0x7D0;  // TOP is 2000 [Set this as high as possible, then work down] This coordinates with the Prescaler
+	OCR1A = ICR1/2; // Half of ICR1 1000
+
+	while(1);			// ensure program runs continuously
+	
 }
+
+
