@@ -124,7 +124,6 @@ void set_toggle(char color, int ms) {
 
 // INTERRUPT HANDLER for yellow LED
 ISR(TIMER3_COMPA_vect) {
-	cli();
 	// This the Interrupt Service Routine for Toggling the yellow LED.
 	// Each time the TCNT count is equal to the OCRxx register, this interrupt is enabled.
 	// At creation of this file, it was initialized to interrupt every 100ms (10Hz).
@@ -136,10 +135,6 @@ ISR(TIMER3_COMPA_vect) {
 		LED_TOGGLE(YELLOW);
 		G_yellow_toggles++;
 	}
-	for (uint32_t i = 0; i < 51; i++) {
-		WAIT_10MS;
-	}
-	sei();
 }
 
 // INTERRUPT HANDLER for green LED
