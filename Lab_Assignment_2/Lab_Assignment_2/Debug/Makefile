@@ -38,7 +38,9 @@ SUBDIRS :=
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
 ../main.c \
-../menu.c
+../menu.c \
+../motors.c \
+../timers.c
 
 
 PREPROCESSING_SRCS += 
@@ -49,23 +51,31 @@ ASM_SRCS +=
 
 OBJS +=  \
 main.o \
-menu.o
+menu.o \
+motors.o \
+timers.o
 
 OBJS_AS_ARGS +=  \
 main.o \
-menu.o
+menu.o \
+motors.o \
+timers.o
 
 C_DEPS +=  \
 main.d \
-menu.d
+menu.d \
+motors.d \
+timers.d
 
 C_DEPS_AS_ARGS +=  \
 main.d \
-menu.d
+menu.d \
+motors.d \
+timers.d
 
-OUTPUT_FILE_PATH +=Seng5831_Assignments.elf
+OUTPUT_FILE_PATH +=Lab_Assignment_2.elf
 
-OUTPUT_FILE_PATH_AS_ARGS +=Seng5831_Assignments.elf
+OUTPUT_FILE_PATH_AS_ARGS +=Lab_Assignment_2.elf
 
 ADDITIONAL_DEPENDENCIES:=
 
@@ -77,6 +87,10 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
+
+
 
 
 
@@ -114,13 +128,13 @@ all: $(OUTPUT_FILE_PATH) $(ADDITIONAL_DEPENDENCIES)
 $(OUTPUT_FILE_PATH): $(OBJS) $(USER_OBJS) $(OUTPUT_FILE_DEP) $(LIB_DEP) $(LINKER_SCRIPT_DEP)
 	@echo Building target: $@
 	@echo Invoking: AVR/GNU Linker : 4.8.1
-	$(QUOTE)C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -o$(OUTPUT_FILE_PATH_AS_ARGS) $(OBJS_AS_ARGS) $(USER_OBJS) $(LIBS) -Wl,-Map="Seng5831_Assignments.map" -Wl,--start-group -Wl,-lpololu_atmega1284p -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mmcu=atmega1284p -lpololu_atmega1284p -Wl,-u,vfprint -lprintf_flt -lm  
+	$(QUOTE)C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -o$(OUTPUT_FILE_PATH_AS_ARGS) $(OBJS_AS_ARGS) $(USER_OBJS) $(LIBS) -Wl,-Map="Lab_Assignment_2.map" -Wl,--start-group -Wl,-lpololu_atmega1284p -Wl,-lm  -Wl,--end-group -Wl,--gc-sections -mmcu=atmega1284p -lpololu_atmega1284p -Wl,-u,vfprint -lprintf_flt -lm  
 	@echo Finished building target: $@
-	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures  "Seng5831_Assignments.elf" "Seng5831_Assignments.hex"
-	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0  --no-change-warnings -O ihex "Seng5831_Assignments.elf" "Seng5831_Assignments.eep" || exit 0
-	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objdump.exe" -h -S "Seng5831_Assignments.elf" > "Seng5831_Assignments.lss"
-	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O srec -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures "Seng5831_Assignments.elf" "Seng5831_Assignments.srec"
-	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-size.exe" "Seng5831_Assignments.elf"
+	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O ihex -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures  "Lab_Assignment_2.elf" "Lab_Assignment_2.hex"
+	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -j .eeprom  --set-section-flags=.eeprom=alloc,load --change-section-lma .eeprom=0  --no-change-warnings -O ihex "Lab_Assignment_2.elf" "Lab_Assignment_2.eep" || exit 0
+	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objdump.exe" -h -S "Lab_Assignment_2.elf" > "Lab_Assignment_2.lss"
+	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-objcopy.exe" -O srec -R .eeprom -R .fuse -R .lock -R .signature -R .user_signatures "Lab_Assignment_2.elf" "Lab_Assignment_2.srec"
+	"C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-size.exe" "Lab_Assignment_2.elf"
 	
 	
 
@@ -132,5 +146,5 @@ $(OUTPUT_FILE_PATH): $(OBJS) $(USER_OBJS) $(OUTPUT_FILE_DEP) $(LIB_DEP) $(LINKER
 clean:
 	-$(RM) $(OBJS_AS_ARGS) $(EXECUTABLES)  
 	-$(RM) $(C_DEPS_AS_ARGS)   
-	rm -rf "Seng5831_Assignments.elf" "Seng5831_Assignments.a" "Seng5831_Assignments.hex" "Seng5831_Assignments.lss" "Seng5831_Assignments.eep" "Seng5831_Assignments.map" "Seng5831_Assignments.srec" "Seng5831_Assignments.usersignatures"
+	rm -rf "Lab_Assignment_2.elf" "Lab_Assignment_2.a" "Lab_Assignment_2.hex" "Lab_Assignment_2.lss" "Lab_Assignment_2.eep" "Lab_Assignment_2.map" "Lab_Assignment_2.srec" "Lab_Assignment_2.usersignatures"
 	

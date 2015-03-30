@@ -44,7 +44,6 @@ void init_LEDs() {
 	LED_ON(GREEN);
 	
 	// leave on for 2 seconds
-	//TODO THIS DON'T WORK, BUT IN MAIN IT DO
 	for (i=0;i<200;i++){
 		WAIT_10MS;
 	}
