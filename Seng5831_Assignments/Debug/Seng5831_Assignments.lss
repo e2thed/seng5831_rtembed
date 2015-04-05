@@ -257,9 +257,9 @@ int main()
 	OCR2A = 125;
      192:	8d e7       	ldi	r24, 0x7D	; 125
      194:	80 93 b3 00 	sts	0x00B3, r24
-	delay_ms(5000);
-     198:	88 e8       	ldi	r24, 0x88	; 136
-     19a:	93 e1       	ldi	r25, 0x13	; 19
+	delay_ms(2000);
+     198:	80 ed       	ldi	r24, 0xD0	; 208
+     19a:	97 e0       	ldi	r25, 0x07	; 7
      19c:	0e 94 0d 0d 	call	0x1a1a	; 0x1a1a <delay_ms>
 	OCR2A = 0;
      1a0:	10 92 b3 00 	sts	0x00B3, r1
