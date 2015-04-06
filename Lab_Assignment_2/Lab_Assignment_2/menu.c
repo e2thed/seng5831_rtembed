@@ -1,31 +1,37 @@
+/*
+Ed Castillo
+ugh
+*/
 #include "menu.h"
-//#include "motor.h"
 
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdbool.h>
 
-// GLOBALS
-extern char		motor1_dir;
-extern int16_t	motor1_speed;
-
-extern bool logger;
-extern bool printValues;
+// my GLOBALS
+// PRINT/DEBUG FLAGS
+extern bool logger;		// print values for graphs
+extern bool prntKs;		// print Kp, Ki, Kd
 extern bool toggleLCD;
-extern double Pr; // reference position / reference speed(?)
-extern double Vr;
-extern double Pm;
-extern double Kp;
-extern double Kd;
-extern double Ki;
-extern bool execTragectory;
+extern bool clearLCD;
 
+// PID Globals
+extern float Pr;		// reference position / reference speed(?)
+extern float Vr;
+extern float Pm;
+extern float Kp;
+extern float Ki;
+extern float Kd;
+extern bool execTragectory;
+extern bool velocity;
+
+// MOTOR Control Vars
+extern int	motor1_speed;
 
 // local "global" data structures
 char receive_buffer[48];
 unsigned char receive_buffer_position;
 char send_buffer[48];
-
 // A generic function for whenever you want to print to your serial comm window.
 // Provide a string and the length of that string. My serial comm likes "\r\n" at
 // the end of each string (be sure to include in length) for proper linefeed.
@@ -33,15 +39,10 @@ void print_usb( char *buffer, int n ){
 	serial_send( USB_COMM, buffer, n );
 	wait_for_sending_to_finish();
 }
-
 void print_menu(){
-	pre_print_usb("\r\nMenu: <char> <int>\r\n");
+	pre_print_usb("\r\nMenu: <char> <float>\r\n");
 	pre_print_usb("\rTYPE {Hh?} for help: ");
 }
-
-// A generic function for whenever you want to print to your serial comm window.
-// Provide a string and the length of that string. My serial comm likes "\r\n" at
-// the end of each string (be sure to include in length) for proper linefeed.
 void pre_print_usb( char *buffer){
 	int length;
 	char tempBuffer[48];
@@ -74,8 +75,6 @@ void init_menu() {
 	print_menu();
 }
 
-
-
 //------------------------------------------------------------------------------------------
 // process_received_byte: Parses a menu command (series of keystrokes) that
 // has been received on USB_COMM and processes it accordingly.
@@ -88,15 +87,16 @@ void process_received_string(const char* buffer)
 	
 	// parse and echo back to serial comm window (and optionally the LCD)
 	char op_cmd;
-	int value;
+	float value;
 	int parsed;
 	
-	parsed = sscanf(buffer, "%c %d", &op_cmd, &value);
+	parsed = sscanf(buffer, "%c %f", &op_cmd, &value);
 	
 	length = sprintf(tempBuffer, "Op:%c V:%d\r\n", op_cmd, value);
 	print_usb( tempBuffer, length);
 	
-	switch (op_cmd) {
+	switch (op_cmd)
+	{
 		case 'l':
 		case 'L':	//L/l: Start/Stop Logging (print) the values of Pr, Pm, and T
 		{
@@ -106,43 +106,48 @@ void process_received_string(const char* buffer)
 		case 'v':
 		case 'V':	//V/v: View the current values Kd, Kp, Vm, Pr, Pm, and T
 		{
-			printValues = true;
+			prntKs = true;
 			break;
 		}
 		case 'r':
 		case 'R':	//R/r : Set the reference position (use unit "counts")
 		{
+			setPBasePIDs();
+			velocity = false;
 			Pr = value;
 			break;
 		}
 		case 's':
 		case 'S':	//S/s : Set the reference speed (use unit "counts"/sec)
 		{
+			setVBasePIDs();
+			velocity = true;
 			Vr = value;
 			break;
 		}
 		case 'P':
 		case 'p':	//p: Decrease Kp by an amount of your choice
 		{
-			Kp = value/10.0;
+			Kp = value;
 			break;
 		}
 		case 'i':
 		case 'I':	//P: Increase Kp by an amount of your choice*
 		{
-			Ki = value/10.0;
+			Ki = value;
 			break;
 		}
 		case 'd':	//D: Increase Kd by an amount of your choice
 		case 'D':	//d: Decrease Kd by an amount of your choice
 		{
-			Kd = value/10.0;
+			Kd = value;
 			break;
 		}
 		case 'b':
 		case 'B':
 		{
-			toggleLCD = true;
+			clearLCD = true;
+			toggleLCD = !toggleLCD;
 			break;
 		}
 		case 'c':
@@ -154,9 +159,16 @@ void process_received_string(const char* buffer)
 		case 't':
 		case 'T':	//t: Execute trajectory
 		{
+			setTBasePIDs();
 			execTragectory = true;
-			motor1_speed = value;
-			set_m1_speed(motor1_speed);
+			velocity = false;
+			break;
+		}
+		case 'k':
+		case 'K':
+		{
+			set_motor_speed();
+			resetPIDs();
 			break;
 		}
 		case 'h':
@@ -171,6 +183,7 @@ void process_received_string(const char* buffer)
 			pre_print_usb("D/d:Set Kd - 10 -> .1\r\n");
 			pre_print_usb("I/i:Set Ki - 10 -> .1\r\n");
 			pre_print_usb("B/b:Toggle LCD\r\n");
+			pre_print_usb("C/c:Run test func. For dbg\r\n");
 			pre_print_usb("t:Execute trajectory\r\n");
 			break;
 		}
@@ -180,8 +193,10 @@ void process_received_string(const char* buffer)
 			return;
 		}
 	}
-	print_menu();
-	//set_m1_speed(Vr);
+	if(!prntKs)
+	{
+		print_menu();
+	}
 
 } //end menu()
 
@@ -249,4 +264,28 @@ void wait_for_sending_to_finish()
 {
 	while(!serial_send_buffer_empty(USB_COMM))
 	serial_check();		// USB_COMM port is always in SERIAL_CHECK mode
+}
+
+void setVBasePIDs(){
+	Kp = .8;
+	Ki = .8;
+	Kd = .02;
+}
+
+void setPBasePIDs(){
+	Kp = .05;
+	Ki = .25;
+	Kd = .1;
+}
+
+void setTBasePIDs(){
+	Kp = .1;
+	Ki = .25;
+	Kd = .1;
+}
+
+void resetPIDs(){
+	Kp = 0.0;
+	Ki = 0.0;
+	Kd = 0.0;
 }
