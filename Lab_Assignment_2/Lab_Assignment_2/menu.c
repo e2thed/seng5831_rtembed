@@ -11,9 +11,11 @@ ugh
 // my GLOBALS
 // PRINT/DEBUG FLAGS
 extern bool logger;		// print values for graphs
+extern bool loggerUSB;
 extern bool prntKs;		// print Kp, Ki, Kd
 extern bool toggleLCD;
 extern bool clearLCD;
+extern long timer1_cnt;
 
 // PID Globals
 extern float Pr;		// reference position / reference speed(?)
@@ -40,8 +42,14 @@ void print_usb( char *buffer, int n ){
 	wait_for_sending_to_finish();
 }
 void print_menu(){
-	pre_print_usb("\r\nMenu: <char> <float>\r\n");
-	pre_print_usb("\rTYPE {Hh?} for help: ");
+	int length;
+	char tempBuffer[48];
+	
+	length = sprintf(tempBuffer, "\r\nKp:% .4f Ki:% .4f Kd:% .4f\r\n", Kp, Ki, Kd);
+	print_usb(tempBuffer, length);
+
+	pre_print_usb("Menu: <char> <float>\r\n");
+	pre_print_usb("TYPE {Hh?} for help: ");
 }
 void pre_print_usb( char *buffer){
 	int length;
@@ -68,7 +76,7 @@ void init_menu() {
 	//memcpy_P( send_buffer, PSTR("USB Serial Initialized\r\n"), 24 );
 	//snprintf( printBuffer, 24, "USB Serial Initialized\r\n");
 	//print_usb( printBuffer, 24 );
-	pre_print_usb( "\r\n\r\nUSB Serial Initialized\r\n");
+	pre_print_usb( "\r\n\r\nUSB Serial Initialized");
 
 	//memcpy_P( send_buffer, MENU, MENU_LENGTH );
 	//print_usb( MENU, MENU_LENGTH );
@@ -112,16 +120,26 @@ void process_received_string(const char* buffer)
 		case 'r':
 		case 'R':	//R/r : Set the reference position (use unit "counts")
 		{
-			setPBasePIDs();
+			if (Kp == 0)
+			{
+				setPBasePIDs();
+			}
 			velocity = false;
+			loggerUSB = true;
+			timer1_cnt = 0;
 			Pr = value;
 			break;
 		}
 		case 's':
 		case 'S':	//S/s : Set the reference speed (use unit "counts"/sec)
 		{
-			setVBasePIDs();
+			if(Kp == 0)
+			{
+				setVBasePIDs();
+			}
 			velocity = true;
+			loggerUSB = true;
+			timer1_cnt = 0;
 			Vr = value;
 			break;
 		}
@@ -267,21 +285,21 @@ void wait_for_sending_to_finish()
 }
 
 void setVBasePIDs(){
-	Kp = .8;
-	Ki = .8;
-	Kd = .02;
+	Kp = .5;
+	Ki = 1.5;
+	Kd = .0001;
 }
 
 void setPBasePIDs(){
-	Kp = .05;
-	Ki = .25;
+	Kp = .3;
+	Ki = .5;
 	Kd = .1;
 }
 
 void setTBasePIDs(){
-	Kp = .1;
-	Ki = .25;
-	Kd = .1;
+	Kp = .3;
+	Ki = .006;
+	Kd = .15;
 }
 
 void resetPIDs(){
