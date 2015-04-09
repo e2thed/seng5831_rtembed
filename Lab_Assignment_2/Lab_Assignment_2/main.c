@@ -175,29 +175,29 @@ ISR(TIMER1_COMPA_vect) {
 		
 		if (timer1_cnt % 4 == 0) // frequency adjust
 		{
-		
-		Vm = (global_counts_m1 - last_global_counts_m1);
-		last_global_counts_m1 = global_counts_m1;
-		error = Vr - Vm;
-		
-		integral += (double)(error * dt);
-		
-		if (integral > 1000)
-		{
-			integral = 1000;
-		}
-		else if (integral < -1000)
-		{
-			integral = -1000;
-		}
-		
-		derivative = (double)(error - lasterror)/dt; // changed signs from +error-lasterror - due to not working out well.
-		lasterror = error;
+			
+			Vm = (global_counts_m1 - last_global_counts_m1);
+			last_global_counts_m1 = global_counts_m1;
+			error = Vr - Vm;
+			
+			integral += (double)(error * dt);
+			
+			if (integral > 1000)
+			{
+				integral = 1000;
+			}
+			else if (integral < -1000)
+			{
+				integral = -1000;
+			}
+			
+			derivative = (double)(error - lasterror)/dt; // changed signs from +error-lasterror - due to not working out well.
+			lasterror = error;
 
-		torq = (Kp*(Vr - Vm)) + (Ki * error) + (Kd * derivative);
-		
-		newMotorSpeed += torq;
-		set_motor_speed(newMotorSpeed);
+			torq = (Kp*(Vr - Vm)) + (Ki * error) + (Kd * derivative);
+			
+			newMotorSpeed += torq;
+			set_motor_speed(newMotorSpeed);
 		} // end frequency adjust
 		
 		if (timer1_cnt > trgt)
@@ -208,7 +208,10 @@ ISR(TIMER1_COMPA_vect) {
 	}
 	else //positional
 	{
-		timer1_cnt++;
+		//if(!execTragectory)
+		//{
+			timer1_cnt++;
+		//}
 		dbgLCD = true;
 		
 		Pm = global_counts_m1;
@@ -216,24 +219,44 @@ ISR(TIMER1_COMPA_vect) {
 		integral += error * dt;
 		derivative = (error - lasterror) / dt;
 		torq = (Kp*error) + (Ki*integral) + (Kd*derivative);
-		//torq = (Kp*error) + (Kd*derivative);
 		newMotorSpeed = (int)torq;
 		set_motor_speed(newMotorSpeed);
 		lasterror = error;
 		
-		if (timer1_cnt > trgt)
+		if (execTragectory)
 		{
-			loggerUSB = false;
-			timer1_cnt = 0;
+			//if (((int)Pm - 10 <= (int)Pr)
+			 //&& ((int)Pm + 10 >= (int)Pr))
+			//{
+				//timer1_cnt++;
+				//if (timer1_cnt % 100 == 0)
+				if(timer1_cnt % 100 == 0)
+				{
+					timer1_cnt = 0;
+					step++;
+				}
+				//else
+				//{
+					//timer1_cnt = 0;
+				//}
+			//}
+		}
+		else
+		{
+			if (timer1_cnt > trgt)
+			{
+				loggerUSB = false;
+				timer1_cnt = 0;
+			}
 		}
 	}
 }
 
 void prnt_intrpt_vals(){
 	lcd_goto_xy(0,0);
-	printf("tcnt:% d", timer1_cnt);
+	printf("tcnt:%ld", timer1_cnt);
 	lcd_goto_xy(0,1);
-	printf("ecnt:% d", global_counts_m1);
+	printf("ecnt:%ld", global_counts_m1);
 }
 
 void prnt_mtr_vals(){
@@ -292,7 +315,6 @@ int main()
 	
 	int length;
 	char tempBuffer[48];
-	int print_throttle = 0;
 	
 	while(1)
 	{
@@ -310,24 +332,24 @@ int main()
 					case 1:
 					{
 						Pr = Pr + deg_to_cnt(90);
-						length = sprintf(tempBuffer, "\r\ns1 Pr:% .3f", Pr);
-						print_usb(tempBuffer, length);
+						//length = sprintf(tempBuffer, "\r\ns1 Pr:% .3f", Pr);
+						//print_usb(tempBuffer, length);
 						lastStep = 1;
 						break;
 					}
 					case 2:
 					{
 						Pr = Pr -(deg_to_cnt(360));
-						length = sprintf(tempBuffer, "\r\ns2 Pr:% .3f", Pr);
-						print_usb(tempBuffer, length);
+						//length = sprintf(tempBuffer, "\r\ns2 Pr:% .3f", Pr);
+						//print_usb(tempBuffer, length);
 						lastStep = 2;
 						break;
 					}
 					case 3:
 					{
 						Pr = Pr + deg_to_cnt(5);
-						length = sprintf(tempBuffer, "\r\nS3 Pr:% .3f", Pr);
-						print_usb(tempBuffer, length);
+						//length = sprintf(tempBuffer, "\r\nS3 Pr:% .3f", Pr);
+						//print_usb(tempBuffer, length);
 						lastStep = 3;
 						break;
 					}
@@ -350,14 +372,14 @@ int main()
 				logger_cnt++;
 				if (velocity)
 				{
-					length = sprintf(tempBuffer, "\r\n% .4f,% .4f,%d", RPM, Vr, newMotorSpeed);
+					length = sprintf(tempBuffer, "\r\n% .2f,% .2f,%d", RPM, Vr, newMotorSpeed);
 					print_usb(tempBuffer, length);
 					loggerUSB = false;
 					timer1_cnt = 0;
 				}
 				else
 				{
-					length = sprintf(tempBuffer, "\r\n% .4f,% .4f,%d", Pm, Pr, newMotorSpeed);
+					length = sprintf(tempBuffer, "\r\n% .2f,% .2f,%d", Pm, Pr, newMotorSpeed);
 					print_usb(tempBuffer, length);
 					loggerUSB = false;
 					timer1_cnt = 0;
@@ -375,7 +397,7 @@ int main()
 			print_usb(tempBuffer, length);
 			length = sprintf(tempBuffer, "Step:%d LastStep:%d\r\n", step, lastStep);
 			print_usb(tempBuffer, length);
-			length = sprintf(tempBuffer, "%d,%d,t:%d\r\n", loggerUSB, dbgLCD, timer1_cnt);
+			length = sprintf(tempBuffer, "%d,%d,t:%ld\r\n", (int)loggerUSB, (int)dbgLCD, timer1_cnt);
 			print_usb(tempBuffer, length);
 			prntKs = !prntKs;
 			print_menu();
@@ -384,7 +406,7 @@ int main()
 		{
 			if(execTragectory)
 			{
-				length = sprintf(tempBuffer, "\r\n% .2f,% .2f,%d", Pm, Pr, newMotorSpeed);
+				length = sprintf(tempBuffer, "\r\n% .2f,% .2f,%d,%ld,%d,%d,%d", Pm, Pr, newMotorSpeed,timer1_cnt,step, lastStep, (int)execTragectory);
 				print_usb(tempBuffer, length);
 			}
 			else
@@ -400,12 +422,12 @@ int main()
 				
 				if (velocity && loggerUSB)
 				{
-					length = sprintf(tempBuffer, "\r\nV: %.3f,%.3f,%.3f,%.0f,%.0f,%d,%d",error, integral, derivative, Vm, Vr, newMotorSpeed,timer1_cnt);
+					length = sprintf(tempBuffer, "\r\nV: %.3f,%.0f,%.0f,%d,%ld",error, Vm, Vr, newMotorSpeed,timer1_cnt);
 					print_usb(tempBuffer, length);
 				}
 				else if (!velocity && loggerUSB)
 				{
-					length = sprintf(tempBuffer, "\r\nP: %.3f,%.3f,%.3f,%.0f,%.0f,%d,%d",error, integral, derivative, Pm, Pr, newMotorSpeed,timer1_cnt);
+					length = sprintf(tempBuffer, "\r\nP: %.3f,%.0f,%.0f,%d,%ld",error, Pm, Pr, newMotorSpeed,timer1_cnt);
 					print_usb(tempBuffer, length);
 				}
 			}

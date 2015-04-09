@@ -177,9 +177,13 @@ void process_received_string(const char* buffer)
 		case 't':
 		case 'T':	//t: Execute trajectory
 		{
-			setTBasePIDs();
+			if (Kp == 0)
+			{
+				setTBasePIDs();
+			}
 			execTragectory = true;
 			velocity = false;
+			timer1_cnt = 0;
 			break;
 		}
 		case 'k':
@@ -298,8 +302,8 @@ void setPBasePIDs(){
 
 void setTBasePIDs(){
 	Kp = .3;
-	Ki = .006;
-	Kd = .15;
+	Ki = .05;
+	Kd = .001;
 }
 
 void resetPIDs(){
