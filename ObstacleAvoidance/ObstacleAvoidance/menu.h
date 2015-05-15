@@ -4,14 +4,6 @@
  * Created: 5/8/2015 2:02:07 PM
  *  Author: US296865
  *
- *	S <int> : Adjust the target speed for both motors when there is no obstacle detected
- *	R <int> : Adjust the top range that obstacles are detected
- *	r <int> : Adjust the low range that obstacles are detected
- *  H <int> : Adjust the hysteresis to minimize changes due to fluctuations
- *  P <float> : Adjust the P values for each motor. Assuming the motors would behave differently and require seperate values
- *  I <float> : Adjust the P values for each motor. Assuming the motors would behave differently and require seperate values
- *  D <float> : Adjust the P values for each motor. Assuming the motors would behave differently and require seperate values
- *
  */ 
 #ifndef __MENU_H
 #define __MENU_H

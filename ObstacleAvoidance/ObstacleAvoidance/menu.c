@@ -1,36 +1,39 @@
 /*
- * menu.c
- *
- * Created: 5/8/2015 2:01:24 PM
- *  Author: US296865
- */ 
+* menu.c
+*
+* Created: 5/8/2015 2:01:24 PM
+*  Author: US296865
+*
+*	S <float> : Adjust the target speed for both motors when there is no obstacle detected
+*	R <float> : Adjust the top range that obstacles are detected
+*	r <float> : Adjust the low range that obstacles are detected
+*   H <float> : Adjust the hysteresis to minimize changes due to fluctuations
+*   P <float> : Adjust the P values for each motor. Assuming the motors would behave differently and require separate values
+*   I <float> : Adjust the P values for each motor. Assuming the motors would behave differently and require separate values
+*   D <float> : Adjust the P values for each motor. Assuming the motors would behave differently and require separate values
+*/
 #include "menu.h"
 
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdbool.h>
 
-// my GLOBALS
-// PRINT/DEBUG FLAGS
+// logger GLOBALS
 extern bool logger;		// print values for graphs
-extern bool loggerUSB;
-extern bool prntKs;		// print Kp, Ki, Kd
-extern bool toggleLCD;
-extern bool clearLCD;
-extern long timer1_cnt;
 
-// PID Globals
-extern float Pr;		// reference position / reference speed(?)
-extern float Vr;
-extern float Pm;
-extern float Kp;
-extern float Ki;
-extern float Kd;
-extern bool execTragectory;
-extern bool velocity;
+// Menu Globals
+extern float Ts;		// target speed
+extern float Mxr;		// max range
+extern float Mnr;		// min range
+extern float H;			// Hysteresis
+extern float Kp;		// P Gain
+extern float Ki;		// I Gain
+extern float Kd;		// D Gain
+extern bool Et;			// execute Trajectory
 
 // MOTOR Control Vars
-extern int	motor1_speed;
+extern int motor1_speed;
+extern int motor2_speed;
 
 // local "global" data structures
 char receive_buffer[48];
